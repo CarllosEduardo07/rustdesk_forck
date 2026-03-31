@@ -38,6 +38,31 @@ const borderColor = Color(0xFF2F65BA);
 
 class _DesktopHomePageState extends State<DesktopHomePage>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
+
+  Future<void> enviarDados() async {
+    final id = bind.mainGetMyId();
+    final hostname = bind.mainGetHostname();
+
+    try {
+      final response = await http.post(
+        Uri.parse("http://192.168.10.77:3000/inventory"),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "id": id,
+          "hostname": hostname,
+        }),
+      );
+
+      print("Status: ${response.statusCode}");
+      print("Resposta: ${response.body}");
+    } catch (e) {
+      print("Erro ao enviar: $e");
+    }
+  }
+
+
   final _leftPaneScrollController = ScrollController();
 
   @override
@@ -70,61 +95,6 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
       ],
     ));
-
-      Column(
-    children: [
-      Text("Meu App"),
-
-      ElevatedButton(
-        onPressed: () {
-          enviarDados();
-        },
-        child: Text("Enviar Info"),
-      ),
-    ],
-  )
-  }
-
-  class _HomePageState extends State<HomePage> {
-
-  Future<void> enviarDados() async {
-  final id = bind.mainGetMyId();
-  final hostname = bind.mainGetHostname();
-
-  try {
-    final response = await http.post(
-      Uri.parse("http://192.168.10.77:3000/inventory"),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "id": id,
-        "hostname": hostname,
-      }),
-    );
-
-    print("Status: ${response.statusCode}");
-    print("Resposta: ${response.body}");
-  } catch (e) {
-    print("Erro ao enviar: $e");
-  }
-}
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              enviarDados();
-            },
-            child: Text("Enviar Info"),
-          ),
-        ],
-      ),
-    );
-   }
   }
 
   Widget _buildBlock({required Widget child}) {
@@ -137,6 +107,14 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     final isOutgoingOnly = bind.isOutgoingOnly();
     final children = <Widget>[
       if (!isOutgoingOnly) buildPresetPasswordWarning(),
+
+      ElevatedButton(
+          onPressed: () {
+            enviarDados();
+          },
+          child: Text("Enviar Info"),
+        ),
+
       if (bind.isCustomClient())
         Align(
           alignment: Alignment.center,
