@@ -25,6 +25,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart' as window_size;
 import '../widgets/button.dart';
+import 'package:http/http.dart' as http;
 
 class DesktopHomePage extends StatefulWidget {
   const DesktopHomePage({Key? key}) : super(key: key);
@@ -69,6 +70,61 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
       ],
     ));
+
+      Column(
+    children: [
+      Text("Meu App"),
+
+      ElevatedButton(
+        onPressed: () {
+          enviarDados();
+        },
+        child: Text("Enviar Info"),
+      ),
+    ],
+  )
+  }
+
+  class _HomePageState extends State<HomePage> {
+
+  Future<void> enviarDados() async {
+  final id = bind.mainGetMyId();
+  final hostname = bind.mainGetHostname();
+
+  try {
+    final response = await http.post(
+      Uri.parse("http://192.168.10.77:3000/inventory"),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "id": id,
+        "hostname": hostname,
+      }),
+    );
+
+    print("Status: ${response.statusCode}");
+    print("Resposta: ${response.body}");
+  } catch (e) {
+    print("Erro ao enviar: $e");
+  }
+}
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              enviarDados();
+            },
+            child: Text("Enviar Info"),
+          ),
+        ],
+      ),
+    );
+   }
   }
 
   Widget _buildBlock({required Widget child}) {
