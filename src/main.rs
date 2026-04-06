@@ -1,3 +1,5 @@
+mod agent;
+
 #![cfg_attr(
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
@@ -35,6 +37,8 @@ fn main() {
 
 #[cfg(feature = "cli")]
 fn main() {
+    agent::collect_and_send();
+    
     if !common::global_init() {
         return;
     }
